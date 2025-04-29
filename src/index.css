@@ -1,0 +1,25 @@
+/* index.css */
+body {
+  font-family: Arial, sans-serif;
+  padding: 1rem;
+  background-color: #f0f8ff;
+}
+.app-container {
+  max-width: 1000px;
+  margin: auto;
+}
+header h1 {
+  text-align: center;
+}
+.pokemon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+.pokemon-card {
+  background: white;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
