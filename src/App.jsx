@@ -1,74 +1,90 @@
-// src/App.jsx
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import FilterBar from "./components/FilterBar";
 import PokemonCard from "./components/PokemonCard";
-import SearchBar from "./components/SearchBar";
-import TypeFilter from "./components/TypeFilter";
+import CompareBox from "./components/CompareBox";
 
 const App = () => {
   const [pokemonList, setPokemonList] = useState([]);
-  const [filteredPokemon, setFilteredPokemon] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("All");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const fetchPokemon = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get("https://pokeapi.co/api/v2/pokemon?limit=150");
-      const results = res.data.results;
-
-      const pokemonData = await Promise.all(
-        results.map((p) => axios.get(p.url).then((res) => res.data))
-      );
-
-      setPokemonList(pokemonData);
-      setFilteredPokemon(pokemonData);
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to load Pokémon.");
-      setLoading(false);
-    }
-  };
+  const [filteredList, setFilteredList] = useState([]);
+  const [types, setTypes] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [compare, setCompare] = useState([]);
 
   useEffect(() => {
-    fetchPokemon();
+    const fetchData = async () => {
+      const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=151");
+      const data = await res.json();
+      const details = await Promise.all(
+        data.results.map((p) => fetch(p.url).then((res) => res.json()))
+      );
+      setPokemonList(details);
+      setFilteredList(details);
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
-    let filtered = pokemonList;
+    const fetchTypes = async () => {
+      const res = await fetch("https://pokeapi.co/api/v2/type");
+      const data = await res.json();
+      setTypes(data.results.map((t) => t.name));
+    };
+    fetchTypes();
+  }, []);
 
-    if (searchTerm) {
+  useEffect(() => {
+    let filtered = pokemonList.filter((p) =>
+      p.name.toLowerCase().includes(search.toLowerCase())
+    );
+    if (selectedType) {
       filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        p.types.some((t) => t.type.name === selectedType)
       );
     }
+    setFilteredList(filtered);
+  }, [search, selectedType, pokemonList]);
 
-    if (selectedType !== "All") {
-      filtered = filtered.filter((p) =>
-        p.types.some((t) => t.type.name === selectedType.toLowerCase())
-      );
+  const toggleCompare = (pokemon) => {
+    if (compare.some((p) => p.id === pokemon.id)) {
+      setCompare(compare.filter((p) => p.id !== pokemon.id));
+    } else if (compare.length < 2) {
+      setCompare([...compare, pokemon]);
     }
+  };
 
-    setFilteredPokemon(filtered);
-  }, [searchTerm, selectedType, pokemonList]);
+  const clearCompare = () => {
+    setCompare([]);
+  };
 
   return (
-    <div className="app-container">
-      <header>
-        <h1>Pokémon Explorer</h1>
-      </header>
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <TypeFilter setSelectedType={setSelectedType} />
-      {loading && <p>Loading Pokémon...</p>}
-      {error && <p>{error}</p>}
-      {!loading && filteredPokemon.length === 0 && <p>No Pokémon found.</p>}
-      <div className="pokemon-grid">
-        {filteredPokemon.map((p) => (
-          <PokemonCard key={p.id} pokemon={p} />
-        ))}
-      </div>
+    <div className="container">
+      <h1>Pokémon Explorer</h1>
+
+      {/* If 2 Pokémon selected, show only compare box */}
+      {compare.length === 2 ? (
+        <CompareBox pokemons={compare} onClear={clearCompare} />
+      ) : (
+        <>
+          <FilterBar
+            search={search}
+            setSearch={setSearch}
+            types={types}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+          />
+          <div className="grid">
+            {filteredList.map((pokemon) => (
+              <PokemonCard
+                key={pokemon.id}
+                pokemon={pokemon}
+                onCompare={toggleCompare}
+                isSelected={compare.some((p) => p.id === pokemon.id)}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

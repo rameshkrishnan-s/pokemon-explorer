@@ -1,25 +1,52 @@
-/* index.css */
 body {
-  font-family: Arial, sans-serif;
-  padding: 1rem;
-  background-color: #f0f8ff;
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
 }
-.app-container {
-  max-width: 1000px;
+
+.container {
+  max-width: 1200px;
   margin: auto;
+  padding: 20px;
 }
-header h1 {
+
+h1 {
   text-align: center;
+  color: #333;
 }
-.pokemon-grid {
+
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
-.pokemon-card {
+
+.card {
   background: white;
-  padding: 1rem;
-  text-align: center;
+  padding: 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.card img {
+  width: 100px;
+}
+
+input,
+select,
+button {
+  padding: 8px;
+  margin: 5px;
+  font-size: 16px;
+}
+
+.compare-box {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
